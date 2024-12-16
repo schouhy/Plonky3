@@ -61,7 +61,7 @@ where
     // TODO: Might be best practice to include other instance data here; see verifier comment.
 
     challenger.observe(trace_commit.clone());
-    challenger.observe_slice(public_values);
+    challenger.observe_slice(public_values.iter());
     let alpha: SC::Challenge = challenger.sample_ext_element();
 
     let quotient_domain =
@@ -192,7 +192,7 @@ where
             // "Transpose" D packed base coefficients into WIDTH scalar extension coefficients.
             (0..core::cmp::min(quotient_size, PackedVal::<SC>::WIDTH)).map(move |idx_in_packing| {
                 SC::Challenge::from_base_fn(|coeff_idx| {
-                    quotient.as_base_slice()[coeff_idx].as_slice()[idx_in_packing]
+                    quotient.as_base_slice().nth(coeff_idx).unwrap().as_slice()[idx_in_packing]
                 })
             })
         })

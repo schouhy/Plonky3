@@ -63,7 +63,7 @@ where
     // collision, since most such changes would completely change the set of satisfying witnesses.
 
     challenger.observe(commitments.trace.clone());
-    challenger.observe_slice(public_values);
+    challenger.observe_slice(public_values.iter());
     let alpha: SC::Challenge = challenger.sample_ext_element();
     challenger.observe(commitments.quotient_chunks.clone());
 

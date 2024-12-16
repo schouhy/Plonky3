@@ -4,7 +4,7 @@ use core::fmt::{Debug, Display};
 use core::hash::Hash;
 use core::iter::{Product, Sum};
 use core::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign};
-use core::slice;
+use core::slice::{self, Iter};
 
 use itertools::Itertools;
 use num_bigint::BigUint;
@@ -444,7 +444,7 @@ pub trait FieldExtensionAlgebra<Base: FieldAlgebra>:
     /// to ensure portability if these values might ever be passed to
     /// (or rederived within) another compilation environment where a
     /// different f might have been used.
-    fn as_base_slice(&self) -> &[Base];
+    fn as_base_slice<'a>(&'a self) -> Iter<'a, Base>;
 
     /// Suppose this field extension is represented by the quotient
     /// ring B[X]/(f(X)) where B is `Base` and f is an irreducible
@@ -476,12 +476,12 @@ pub trait ExtensionField<Base: Field>: Field + FieldExtensionAlgebra<Base> {
 
     #[inline(always)]
     fn is_in_basefield(&self) -> bool {
-        self.as_base_slice()[1..].iter().all(Field::is_zero)
+        self.as_base_slice().skip(1).all(Field::is_zero)
     }
 
     fn as_base(&self) -> Option<Base> {
         if self.is_in_basefield() {
-            Some(self.as_base_slice()[0])
+            Some(*self.as_base_slice().next().unwrap())
         } else {
             None
         }
@@ -495,11 +495,11 @@ pub trait ExtensionField<Base: Field>: Field + FieldExtensionAlgebra<Base> {
         let powers = self.powers().take(Base::Packing::WIDTH + 1).collect_vec();
         // Transpose first WIDTH powers
         let current = Self::ExtensionPacking::from_base_fn(|i| {
-            Base::Packing::from_fn(|j| powers[j].as_base_slice()[i])
+            Base::Packing::from_fn(|j| *powers[j].as_base_slice().nth(i).unwrap())
         });
         // Broadcast self^WIDTH
         let multiplier = Self::ExtensionPacking::from_base_fn(|i| {
-            Base::Packing::from(powers[Base::Packing::WIDTH].as_base_slice()[i])
+            Base::Packing::from(*powers[Base::Packing::WIDTH].as_base_slice().nth(i).unwrap())
         });
 
         Powers {
@@ -534,8 +534,8 @@ impl<FA: FieldAlgebra> FieldExtensionAlgebra<FA> for FA {
     }
 
     #[inline(always)]
-    fn as_base_slice(&self) -> &[FA] {
-        slice::from_ref(self)
+    fn as_base_slice<'a>(&'a self) -> Iter<'a, FA> {
+        slice::from_ref(self).iter()
     }
 }
 

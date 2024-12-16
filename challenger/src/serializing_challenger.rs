@@ -63,7 +63,7 @@ where
 impl<F: PrimeField32, Inner: CanObserve<u8>> CanObserve<F> for SerializingChallenger32<F, Inner> {
     fn observe(&mut self, value: F) {
         self.inner
-            .observe_slice(&value.to_unique_u32().to_le_bytes());
+            .observe_slice(value.to_unique_u32().to_le_bytes().iter());
     }
 }
 
@@ -82,7 +82,7 @@ impl<F: PrimeField32, const N: usize, Inner: CanObserve<u8>> CanObserve<Hash<F, 
 {
     fn observe(&mut self, values: Hash<F, u64, N>) {
         for value in values {
-            self.inner.observe_slice(&value.to_le_bytes());
+            self.inner.observe_slice(value.to_le_bytes().iter());
         }
     }
 }
@@ -172,7 +172,7 @@ where
 impl<F: PrimeField64, Inner: CanObserve<u8>> CanObserve<F> for SerializingChallenger64<F, Inner> {
     fn observe(&mut self, value: F) {
         self.inner
-            .observe_slice(&value.to_unique_u64().to_le_bytes());
+            .observe_slice(value.to_unique_u64().to_le_bytes().iter());
     }
 }
 
@@ -191,7 +191,7 @@ impl<F: PrimeField64, const N: usize, Inner: CanObserve<u8>> CanObserve<Hash<F, 
 {
     fn observe(&mut self, values: Hash<F, u64, N>) {
         for value in values {
-            self.inner.observe_slice(&value.to_le_bytes());
+            self.inner.observe_slice(value.to_le_bytes().iter());
         }
     }
 }

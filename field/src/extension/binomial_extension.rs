@@ -5,6 +5,7 @@ use core::array;
 use core::fmt::{self, Debug, Display, Formatter};
 use core::iter::{Product, Sum};
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
+use core::slice::Iter;
 
 use itertools::Itertools;
 use num_bigint::BigUint;
@@ -72,7 +73,7 @@ impl<F: BinomiallyExtendable<D>, const D: usize> HasFrobenius<F> for BinomialExt
             // x^(n^(count % D))
             return self.repeated_frobenius(count % D);
         }
-        let arr: &[F] = self.as_base_slice();
+        let arr: Iter<F> = self.as_base_slice();
 
         // z0 = DTH_ROOT^count = W^(k * count) where k = floor((n-1)/D)
         let mut z0 = F::DTH_ROOT;
@@ -81,8 +82,8 @@ impl<F: BinomiallyExtendable<D>, const D: usize> HasFrobenius<F> for BinomialExt
         }
 
         let mut res = [F::ZERO; D];
-        for (i, z) in z0.powers().take(D).enumerate() {
-            res[i] = arr[i] * z;
+        for (i, (z, a)) in z0.powers().take(D).zip(arr).enumerate() {
+            res[i] = *a * z;
         }
 
         Self::from_base_slice(&res)
@@ -544,8 +545,8 @@ where
     }
 
     #[inline(always)]
-    fn as_base_slice(&self) -> &[FA] {
-        &self.value
+    fn as_base_slice<'a>(&'a self) -> Iter<'a, FA>{
+        self.value.iter()
     }
 }
 

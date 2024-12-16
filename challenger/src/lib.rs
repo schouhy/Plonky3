@@ -11,7 +11,7 @@ mod multi_field_challenger;
 mod serializing_challenger;
 
 use alloc::vec::Vec;
-use core::array;
+use core::{array, slice::Iter};
 
 pub use duplex_challenger::*;
 pub use grinding_challenger::*;
@@ -23,7 +23,7 @@ pub use serializing_challenger::*;
 pub trait CanObserve<T> {
     fn observe(&mut self, value: T);
 
-    fn observe_slice(&mut self, values: &[T])
+    fn observe_slice(&mut self, values: Iter<T>)
     where
         T: Clone,
     {
@@ -72,7 +72,7 @@ where
     }
 
     #[inline(always)]
-    fn observe_slice(&mut self, values: &[T])
+    fn observe_slice(&mut self, values: Iter<T>)
     where
         T: Clone,
     {

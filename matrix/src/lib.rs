@@ -234,7 +234,7 @@ pub trait Matrix<T: Send + Sync>: Send + Sync {
                 || EF::ExtensionPacking::zero_vec(packed_width),
                 |mut acc, (row, &scale)| {
                     let scale = EF::ExtensionPacking::from_base_fn(|i| {
-                        T::Packing::from(scale.as_base_slice()[i])
+                        T::Packing::from(*scale.as_base_slice().nth(i).unwrap())
                     });
                     izip!(&mut acc, row).for_each(|(l, r)| *l += scale * r);
                     acc
@@ -249,7 +249,7 @@ pub trait Matrix<T: Send + Sync>: Send + Sync {
             .into_iter()
             .flat_map(|p| {
                 (0..T::Packing::WIDTH)
-                    .map(move |i| EF::from_base_fn(|j| p.as_base_slice()[j].as_slice()[i]))
+                    .map(move |i| EF::from_base_fn(|j| p.as_base_slice().nth(j).unwrap().as_slice()[i]))
             })
             .take(self.width())
             .collect()
@@ -270,7 +270,7 @@ pub trait Matrix<T: Send + Sync>: Send + Sync {
                 let packed_sum_of_packed: EF::ExtensionPacking =
                     dot_product(powers_packed.iter().copied(), row_packed);
                 let sum_of_packed: EF = EF::from_base_fn(|i| {
-                    packed_sum_of_packed.as_base_slice()[i]
+                    packed_sum_of_packed.as_base_slice().nth(i).unwrap()
                         .as_slice()
                         .iter()
                         .copied()

@@ -81,7 +81,7 @@ where
             self.idx = 0;
             self.inner.next();
         }
-        let value = self.inner.peek()?.as_base_slice()[self.idx];
+        let value = *self.inner.peek()?.as_base_slice().nth(self.idx).unwrap();
         self.idx += 1;
         Some(value)
     }
